@@ -1,8 +1,8 @@
 {
-  "default": [
-    "C:\\Users\\roman\\Documents\\SimuVerseFramework_MK1\\main.py",
-    "C:\\Users\\roman\\OneDrive\\Documents\\Unity Projects\\SimuVerse3D\\SimuExoV1\\Assets\\Scripts\\AgentBrain.cs",
-    "C:\\Users\\roman\\OneDrive\\Documents\\Unity Projects\\SimuVerse3D\\SimuExoV1\\Assets\\Scripts\\AgentTools.cs",
-    "C:\\Users\\roman\\OneDrive\\Documents\\Unity Projects\\SimuVerse3D\\SimuExoV1\\Assets\\Scripts\\WorldManager.cs"
+  "SimuVerse_Dev": [
+    "/home/roman-slack/SimuVerseFramework_MK1/main.py",
+    "/home/roman-slack/SimuExoV1/Assets/Scripts/AgentBrain.cs",
+    "/home/roman-slack/SimuExoV1/Assets/Scripts/AgentTools.cs",
+    "/home/roman-slack/SimuExoV1/Assets/Scripts/WorldManager.cs"
   ]
 }

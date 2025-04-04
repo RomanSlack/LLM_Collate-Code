@@ -28,10 +28,10 @@ EXTENSION_MAP = {
 if not os.path.exists(PROFILES_FILE):
     # You can seed some default file paths here if you like
     default_paths = [
-        r"C:\Users\roman\Documents\SimuVerseFramework_MK1\main.py",
-        r"C:\Users\roman\OneDrive\Documents\Unity Projects\SimuVerse3D\SimuExoV1\Assets\Scripts\AgentBrain.cs",
-        r"C:\Users\roman\OneDrive\Documents\Unity Projects\SimuVerse3D\SimuExoV1\Assets\Scripts\AgentTools.cs",
-        r"C:\Users\roman\OneDrive\Documents\Unity Projects\SimuVerse3D\SimuExoV1\Assets\Scripts\WorldManager.cs",
+        r"/home/roman-slack/SimuVerseFramework_MK1/main.py",
+        r"/home/roman-slack/SimuExoV1/Assets/Scripts/AgentBrain.cs",
+        r"/home/roman-slack/SimuExoV1/Assets/Scripts/AgentTools.cs",
+        r"/home/roman-slack/SimuExoV1/Assets/Scripts/WorldManager.cs",
     ]
     with open(PROFILES_FILE, "w", encoding="utf-8") as f:
         json.dump({"default": default_paths}, f, indent=2)
