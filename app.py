@@ -50,31 +50,71 @@ def save_profiles(profiles):
 # HELPER: AGGREGATE FILES
 # -----------------------
 def aggregate_files(file_paths):
-    """Read each file, detect language, and return a combined JSON-like string."""
+    """Read each file or directory, detect language, and return a combined JSON-like string."""
     aggregated_data = []
     
     for path in file_paths:
-        _, ext = os.path.splitext(path)
-        language = EXTENSION_MAP.get(ext.lower(), "Unknown")
-
-        try:
-            with open(path, "r", encoding="utf-8") as file:
-                content = file.read()
-            aggregated_data.append({
-                "filename": os.path.basename(path),
-                "language": language,
-                "content": content
-            })
-        except Exception as e:
-            aggregated_data.append({
-                "filename": os.path.basename(path),
-                "language": "Error",
-                "content": f"Could not read file: {e}"
-            })
+        # Check if path is a directory
+        if os.path.isdir(path):
+            # Process directory recursively
+            for root, _, files in os.walk(path):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    # Skip hidden files and directories
+                    if os.path.basename(file_path).startswith('.'):
+                        continue
+                    process_file(file_path, aggregated_data)
+        else:
+            # Process single file
+            process_file(path, aggregated_data)
 
     # Create a string that starts with "Current code below:" then the JSON
     combined = "Current code below:\n" + json.dumps(aggregated_data, indent=2)
     return combined
+
+def process_file(path, aggregated_data):
+    """Process a single file and add it to the aggregated data."""
+    _, ext = os.path.splitext(path)
+    language = EXTENSION_MAP.get(ext.lower(), "Unknown")
+    
+    # Skip binary files and other non-text formats
+    binary_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.pdf', '.zip', 
+                         '.tar', '.gz', '.exe', '.dll', '.so', '.pyc', '.class'}
+    if ext.lower() in binary_extensions:
+        aggregated_data.append({
+            "filename": os.path.basename(path),
+            "language": "Binary",
+            "content": f"[Binary file: {os.path.basename(path)}]",
+            "full_path": path
+        })
+        return
+
+    try:
+        # Try to read as text
+        with open(path, "r", encoding="utf-8") as file:
+            content = file.read()
+        aggregated_data.append({
+            "filename": os.path.basename(path),
+            "language": language,
+            "content": content,
+            "full_path": path
+        })
+    except UnicodeDecodeError:
+        # Handle case where the file is binary but doesn't have a recognized extension
+        aggregated_data.append({
+            "filename": os.path.basename(path),
+            "language": "Binary",
+            "content": f"[Binary file: {os.path.basename(path)}]",
+            "full_path": path
+        })
+    except Exception as e:
+        # Handle other errors
+        aggregated_data.append({
+            "filename": os.path.basename(path),
+            "language": "Error",
+            "content": f"Could not read file: {e}",
+            "full_path": path
+        })
 
 # -----------------------
 # ROUTES
@@ -84,6 +124,13 @@ def index():
     profiles = load_profiles()
     # If there's no explicit selected profile in the query, pick "default" if it exists
     selected_profile = request.args.get("profile", "default" if "default" in profiles else None)
+    
+    # Pass the os module to the template for path operations
+    template_context = {
+        "profiles": profiles,
+        "selected_profile": selected_profile,
+        "os": os
+    }
 
     # Construct a minimal HTML using render_template_string
     template = """
@@ -595,14 +642,17 @@ def index():
 
                 {% if selected_profile %}
                 <div class="panel">
-                    <h3><i class="fas fa-file-code"></i> Add File to Profile</h3>
+                    <h3><i class="fas fa-file-code"></i> Add File or Folder to Profile</h3>
                     <form action="{{ url_for('add_path') }}" method="POST">
                         <input type="hidden" name="profile" value="{{ selected_profile }}">
                         <div class="form-control">
-                            <label for="file_path">File Path</label>
-                            <input type="text" id="file_path" name="file_path" placeholder="C:\\path\\to\\file.py" required>
+                            <label for="file_path">File or Folder Path</label>
+                            <input type="text" id="file_path" name="file_path" placeholder="/path/to/file.py or /path/to/folder" required>
+                            <small style="display: block; margin-top: 5px; color: #666;">
+                                <i class="fas fa-info-circle"></i> For folders, all files will be processed recursively.
+                            </small>
                         </div>
-                        <button type="submit"><i class="fas fa-plus"></i> Add File</button>
+                        <button type="submit"><i class="fas fa-plus"></i> Add Path</button>
                     </form>
                 </div>
                 {% endif %}
@@ -631,24 +681,33 @@ def index():
                                             {% for path in profiles[selected_profile] %}
                                                 <div class="file-item">
                                                     <div class="file-icon">
-                                                        {% set ext = path.split('.')[-1] %}
-                                                        {% if ext == 'py' %}
-                                                            <i class="fab fa-python" style="color: #3776AB;"></i>
-                                                        {% elif ext == 'js' %}
-                                                            <i class="fab fa-js" style="color: #F7DF1E;"></i>
-                                                        {% elif ext == 'html' %}
-                                                            <i class="fab fa-html5" style="color: #E34F26;"></i>
-                                                        {% elif ext == 'css' %}
-                                                            <i class="fab fa-css3-alt" style="color: #1572B6;"></i>
-                                                        {% elif ext == 'java' %}
-                                                            <i class="fab fa-java" style="color: #007396;"></i>
-                                                        {% elif ext == 'cs' %}
-                                                            <i class="fas fa-code" style="color: #68217A;"></i>
+                                                        {% if os.path.isdir(path) %}
+                                                            <i class="fas fa-folder" style="color: #FFC107;"></i>
                                                         {% else %}
-                                                            <i class="fas fa-file-code"></i>
+                                                            {% set ext = path.split('.')[-1] %}
+                                                            {% if ext == 'py' %}
+                                                                <i class="fab fa-python" style="color: #3776AB;"></i>
+                                                            {% elif ext == 'js' %}
+                                                                <i class="fab fa-js" style="color: #F7DF1E;"></i>
+                                                            {% elif ext == 'html' %}
+                                                                <i class="fab fa-html5" style="color: #E34F26;"></i>
+                                                            {% elif ext == 'css' %}
+                                                                <i class="fab fa-css3-alt" style="color: #1572B6;"></i>
+                                                            {% elif ext == 'java' %}
+                                                                <i class="fab fa-java" style="color: #007396;"></i>
+                                                            {% elif ext == 'cs' %}
+                                                                <i class="fas fa-code" style="color: #68217A;"></i>
+                                                            {% else %}
+                                                                <i class="fas fa-file-code"></i>
+                                                            {% endif %}
                                                         {% endif %}
                                                     </div>
-                                                    <div class="file-path" title="{{ path }}">{{ path }}</div>
+                                                    <div class="file-path" title="{{ path }}">
+                                                        {{ path }}
+                                                        {% if os.path.isdir(path) %}
+                                                            <span class="language-label" style="background-color: #FFF3CD; color: #856404;">Folder</span>
+                                                        {% endif %}
+                                                    </div>
                                                     <div class="file-actions">
                                                         <button type="button" class="remove-file" data-path="{{ path }}" data-profile="{{ selected_profile }}" title="Remove file">
                                                             <i class="fas fa-times"></i>
@@ -769,14 +828,47 @@ Click 'Generate & Copy to Clipboard' on the Files tab to generate output."></tex
                     });
                 }
                 
-                // Remove file functionality (placeholder - not implemented in backend)
+                // Remove file functionality
                 const removeButtons = document.querySelectorAll('.remove-file');
                 removeButtons.forEach(button => {
                     button.addEventListener('click', () => {
                         const filePath = button.getAttribute('data-path');
                         const profile = button.getAttribute('data-profile');
-                        if (confirm("Are you sure you want to remove this file from the profile?")) {
-                            showNotification("Feature not implemented yet. You would remove: " + filePath, "error");
+                        if (confirm("Are you sure you want to remove this path from the profile?")) {
+                            fetch("{{ url_for('remove_path') }}", {
+                                method: "POST",
+                                headers: {"Content-Type": "application/json"},
+                                body: JSON.stringify({ profile: profile, path: filePath })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Remove the element from the DOM
+                                    button.closest('.file-item').remove();
+                                    showNotification("Path removed successfully.", "success");
+                                    
+                                    // If no files left, show empty state
+                                    if (document.querySelectorAll('.file-item').length === 0) {
+                                        const fileList = document.querySelector('.file-list');
+                                        if (fileList) {
+                                            fileList.insertAdjacentHTML('afterend', `
+                                                <div class="empty-state">
+                                                    <i class="fas fa-folder-open"></i>
+                                                    <p>No files added to this profile yet.</p>
+                                                    <p>Add your first file using the form in the sidebar.</p>
+                                                </div>
+                                            `);
+                                            fileList.remove();
+                                            document.querySelector('.actions-bar')?.remove();
+                                        }
+                                    }
+                                } else {
+                                    showNotification(data.message || "Failed to remove path.", "error");
+                                }
+                            })
+                            .catch(err => {
+                                showNotification("Error: " + err, "error");
+                            });
                         }
                     });
                 });
@@ -811,7 +903,7 @@ Click 'Generate & Copy to Clipboard' on the Files tab to generate output."></tex
     </body>
     </html>
     """
-    return render_template_string(template, profiles=profiles, selected_profile=selected_profile)
+    return render_template_string(template, **template_context)
 
 @app.route("/add_profile", methods=["POST"])
 def add_profile():
@@ -842,6 +934,24 @@ def add_path():
         profiles[profile].append(file_path)
     save_profiles(profiles)
     return redirect(url_for("index", profile=profile))
+
+@app.route("/remove_path", methods=["POST"])
+def remove_path():
+    """Remove a file or folder path from the specified profile."""
+    data = request.get_json()
+    profile = data.get("profile")
+    path = data.get("path")
+    
+    if not profile or not path:
+        return jsonify({"success": False, "message": "Missing profile or path"}), 400
+    
+    profiles = load_profiles()
+    if profile in profiles and path in profiles[profile]:
+        profiles[profile].remove(path)
+        save_profiles(profiles)
+        return jsonify({"success": True})
+    
+    return jsonify({"success": False, "message": "Path not found in profile"}), 404
 
 @app.route("/generate", methods=["POST"])
 def generate():

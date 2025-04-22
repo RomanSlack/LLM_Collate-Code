@@ -1,8 +1,44 @@
 {
   "SimuVerse_Dev": [
-    "/home/roman-slack/SimuVerseFramework_MK1/main.py",
-    "/home/roman-slack/SimuExoV1/Assets/Scripts/AgentBrain.cs",
-    "/home/roman-slack/SimuExoV1/Assets/Scripts/AgentTools.cs",
-    "/home/roman-slack/SimuExoV1/Assets/Scripts/WorldManager.cs"
+    "/home/roman-slack/SimuExoV1/Assets/Scripts",
+    "/home/roman-slack/SimuExoV1/SimuVerse_Backend"
+  ],
+  "FirstChat": [
+    "/home/roman-slack/FirstChat_BackEnd/scraper_layer/browser.py",
+    "/home/roman-slack/FirstChat_BackEnd/scraper_layer/config.py",
+    "/home/roman-slack/FirstChat_BackEnd/scraper_layer/data_processor.py",
+    "/home/roman-slack/FirstChat_BackEnd/scraper_layer/main.py",
+    "/home/roman-slack/FirstChat_BackEnd/scraper_layer/run_scraper",
+    "/home/roman-slack/FirstChat_BackEnd/scraper_layer/requirements.txt"
+  ],
+  "Juris_Upload": [
+    "/home/roman-slack/Juris_BackEnd/juris_upload/app/core/config.py",
+    "/home/roman-slack/Juris_BackEnd/juris_upload/app/models/document.py",
+    "/home/roman-slack/Juris_BackEnd/juris_upload/app/services/document_processing/cleaner.py",
+    "/home/roman-slack/Juris_BackEnd/juris_upload/app/services/document_processing/splitter.py",
+    "/home/roman-slack/Juris_BackEnd/juris_upload/app/services/storage/azure_blob.py",
+    "/home/roman-slack/Juris_BackEnd/juris_upload/app/main.py",
+    "/home/roman-slack/Juris_BackEnd/juris_upload/logs/juris_upload.log",
+    "/home/roman-slack/Juris_BackEnd/juris_upload/README.md"
+  ],
+  "Juris_Vector": [
+    "/home/roman-slack/Juris_BackEnd/juris_vector/app/core/config.py",
+    "/home/roman-slack/Juris_BackEnd/juris_vector/app/models/document.py",
+    "/home/roman-slack/Juris_BackEnd/juris_vector/app/services/embedding/azure_openai.py",
+    "/home/roman-slack/Juris_BackEnd/juris_vector/app/services/embedding/factory.py",
+    "/home/roman-slack/Juris_BackEnd/juris_vector/app/services/storage/azure_blob.py",
+    "/home/roman-slack/Juris_BackEnd/juris_vector/app/services/vectorization.py",
+    "/home/roman-slack/Juris_BackEnd/juris_vector/app/main.py",
+    "/home/roman-slack/Juris_BackEnd/juris_vector/logs/juris_vector.log"
+  ],
+  "Juris_query": [
+    "/home/roman-slack/Juris_BackEnd/juris_query/app/api/routes.py",
+    "/home/roman-slack/Juris_BackEnd/juris_query/app/core/config.py",
+    "/home/roman-slack/Juris_BackEnd/juris_query/app/models/query.py",
+    "/home/roman-slack/Juris_BackEnd/juris_query/app/services/vector_search/azure_search.py",
+    "/home/roman-slack/Juris_BackEnd/juris_query/app/utils/logger.py",
+    "/home/roman-slack/Juris_BackEnd/juris_query/app/main.py",
+    "/home/roman-slack/Juris_BackEnd/juris_query/logs/azure_search.log",
+    "/home/roman-slack/Juris_BackEnd/juris_query/README.md"
   ]
 }
